@@ -1,3 +1,7 @@
+from multiprocessing import Pool
+import tqdm
+
+
 def call(r1, r2, a):
     if (r1, r2) in cache:
         # return result from cache instead of calling
@@ -18,10 +22,8 @@ def ret(r1, r2):
 
 
 def ack(reg1, reg2, reg8):
-    global cycles
     addr = 0x17a1
     while True:
-        cycles += 1
         if addr == 0x17a1:
             if reg1 != 0:
                 addr = 0x17a9
@@ -58,15 +60,24 @@ def ack(reg1, reg2, reg8):
             continue
 
 
+def call_ack(reg8):
+    global cache, cache_res, stack
+    cache = {}
+    cache_res = []
+    stack = []
+    res = ack(4, 1, reg8)
+    # print(reg8, res)
+    return (reg8, res)
+    
+
 if __name__ == '__main__':
-    solutions = []
-    for reg8 in range(0, 32768):
-        cycles = 0
-        cache = {}
-        cache_res = []
-        stack = []
-        res = ack(4, 1, reg8)
-        print(f'reg 8 = {reg8}, cycles = {cycles//1000}K, result = {res}')
-        if res == 6:
-            solutions += [reg8]
-    print(f'solutions found: {solutions}')
+    with Pool() as p:
+        # tasks = list(range(0, 32768))
+        tasks = range(0, 32768)
+        solutions = []
+        for res in tqdm.tqdm(p.imap_unordered(call_ack, tasks),
+                             total=len(tasks), ascii=True):
+            if res[1] == 6:
+                solutions.append(res[0])
+    print(solutions)
+    
