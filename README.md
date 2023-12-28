@@ -1,4 +1,4 @@
-This is a set of programs for solving the Synacore Challenge. You can
+This is a set of programs for solving the Synacor Challenge. You can
 find an archived copy of the challenge here:
 
 https://github.com/Aneurysm9/vm_challenge
